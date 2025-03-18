@@ -1,0 +1,50 @@
+name: android-build
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Android App
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check code từ repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Thiết lập môi trường JDK 17 ( yêu cầu cho Android Gradle Plugin mới nhất)
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temuri'
+          java-version: '17'
+
+      # Cài đặt môi trường SDK
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Cấp quyền cho Android Wrapper
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # 5. Kiểm tra và build ứng dụng
+      - name: Build app
+        run: ./gradlew assembleDebug
+
+      # 6. Lưu trữ file APK đầu ra
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: tiktok-downloader-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
